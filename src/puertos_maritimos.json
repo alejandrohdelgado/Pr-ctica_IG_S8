@@ -1,0 +1,202 @@
+{
+  "LPA": {
+    "id": "LPA",
+    "nombre": "Puerto de La Luz (Las Palmas)",
+    "lat": 28.145,
+    "lon": -15.42,
+    "zona": "Canarias",
+    "isla": "Gran Canaria"
+  },
+  "AGA": {
+    "id": "AGA",
+    "nombre": "Puerto de Las Nieves (Agaete)",
+    "lat": 28.102,
+    "lon": -15.711,
+    "zona": "Canarias",
+    "isla": "Gran Canaria"
+  },
+  "TCI": {
+    "id": "TCI",
+    "nombre": "Santa Cruz de Tenerife",
+    "lat": 28.471,
+    "lon": -16.242,
+    "zona": "Canarias",
+    "isla": "Tenerife"
+  },
+  "LCR": {
+    "id": "LCR",
+    "nombre": "Los Cristianos",
+    "lat": 28.051,
+    "lon": -16.719,
+    "zona": "Canarias",
+    "isla": "Tenerife"
+  },
+  "ACE": {
+    "id": "ACE",
+    "nombre": "Puerto de Arrecife",
+    "lat": 28.963,
+    "lon": -13.541,
+    "zona": "Canarias",
+    "isla": "Lanzarote"
+  },
+  "PBL": {
+    "id": "PBL",
+    "nombre": "Playa Blanca",
+    "lat": 28.862,
+    "lon": -13.831,
+    "zona": "Canarias",
+    "isla": "Lanzarote"
+  },
+  "COR": {
+    "id": "COR",
+    "nombre": "Corralejo",
+    "lat": 28.741,
+    "lon": -13.864,
+    "zona": "Canarias",
+    "isla": "Fuerteventura"
+  },
+  "FUE": {
+    "id": "FUE",
+    "nombre": "Puerto del Rosario",
+    "lat": 28.498,
+    "lon": -13.856,
+    "zona": "Canarias",
+    "isla": "Fuerteventura"
+  },
+  "MRJ": {
+    "id": "MRJ",
+    "nombre": "Morro Jable",
+    "lat": 28.049,
+    "lon": -14.354,
+    "zona": "Canarias",
+    "isla": "Fuerteventura"
+  },
+  "SPC": {
+    "id": "SPC",
+    "nombre": "Santa Cruz de La Palma",
+    "lat": 28.679,
+    "lon": -17.765,
+    "zona": "Canarias",
+    "isla": "La Palma"
+  },
+  "GMZ": {
+    "id": "GMZ",
+    "nombre": "San Sebastián de La Gomera",
+    "lat": 28.089,
+    "lon": -17.108,
+    "zona": "Canarias",
+    "isla": "La Gomera"
+  },
+  "VDE": {
+    "id": "VDE",
+    "nombre": "Puerto de La Estaca",
+    "lat": 27.781,
+    "lon": -17.904,
+    "zona": "Canarias",
+    "isla": "El Hierro"
+  },
+  "CAD": {
+    "id": "CAD",
+    "nombre": "Puerto de Cádiz",
+    "lat": 36.535,
+    "lon": -6.291,
+    "zona": "Península",
+    "isla": "Andalucía"
+  },
+  "HUV": {
+    "id": "HUV",
+    "nombre": "Puerto de Huelva",
+    "lat": 37.132,
+    "lon": -6.932,
+    "zona": "Península",
+    "isla": "Andalucía"
+  },
+  "ALG": {
+    "id": "ALG",
+    "nombre": "Puerto de Algeciras",
+    "lat": 36.133,
+    "lon": -5.441,
+    "zona": "Estrecho",
+    "isla": "Andalucía"
+  },
+  "MAL": {
+    "id": "MAL",
+    "nombre": "Puerto de Málaga",
+    "lat": 36.714,
+    "lon": -4.418,
+    "zona": "Península",
+    "isla": "Andalucía"
+  },
+  "MOT": {
+    "id": "MOT",
+    "nombre": "Puerto de Motril",
+    "lat": 36.723,
+    "lon": -3.521,
+    "zona": "Península",
+    "isla": "Andalucía"
+  },
+  "VGO": {
+    "id": "VGO",
+    "nombre": "Puerto de Vigo",
+    "lat": 42.235,
+    "lon": -8.732,
+    "zona": "Península",
+    "isla": "Galicia"
+  },
+  "VLC": {
+    "id": "VLC",
+    "nombre": "Puerto de Valencia",
+    "lat": 39.452,
+    "lon": -0.321,
+    "zona": "Península",
+    "isla": "Comunidad Valenciana"
+  },
+  "BCN": {
+    "id": "BCN",
+    "nombre": "Puerto de Barcelona",
+    "lat": 41.354,
+    "lon": 2.171,
+    "zona": "Península",
+    "isla": "Cataluña"
+  },
+  "PMI": {
+    "id": "PMI",
+    "nombre": "Palma de Mallorca",
+    "lat": 39.562,
+    "lon": 2.631,
+    "zona": "Baleares",
+    "isla": "Mallorca"
+  },
+  "CEU": {
+    "id": "CEU",
+    "nombre": "Puerto de Ceuta",
+    "lat": 35.892,
+    "lon": -5.312,
+    "zona": "Estrecho",
+    "isla": "Ceuta"
+  },
+  "MLN": {
+    "id": "MLN",
+    "nombre": "Puerto de Melilla",
+    "lat": 35.291,
+    "lon": -2.934,
+    "zona": "Estrecho",
+    "isla": "Melilla"
+  },
+  "CAS": {
+    "id": "CAS",
+    "nombre": "Casablanca (Marruecos)",
+    "lat": 33.603,
+    "lon": -7.611,
+    "zona": "Internacional",
+    "isla": "Marruecos"
+  },
+  "SIN": {
+    "id": "SIN",
+    "nombre": "Puerto de Sines (Portugal)",
+    "lat": 37.951,
+    "lon": -8.872,
+    "zona": "Internacional",
+    "isla": "Portugal"
+  }
+}

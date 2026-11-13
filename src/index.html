@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <title>IGS8 – Mapa de Tráfico Marítimo en España y Canarias</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  </head>
+
+  <body>
+    <style>
+      :root {
+        --bg-glass: rgba(10, 22, 40, 0.86);
+        --border-glass: rgba(56, 189, 248, 0.3);
+        --accent-cyan: #38bdf8;
+        --accent-gold: #f5c542;
+        --accent-blue: #3b82f6;
+        --accent-purple: #c084fc;
+        --text-main: #f1f5f9;
+        --text-muted: #94a3b8;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background-color: #040d1a;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+          Ubuntu, Cantarell, sans-serif;
+        color: var(--text-main);
+        user-select: none;
+      }
+
+      canvas {
+        display: block;
+        width: 100vw;
+        height: 100vh;
+      }
+
+      /* =================== HUD SUPERIOR =================== */
+      #hud-container {
+        position: absolute;
+        top: 14px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 20;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        pointer-events: none;
+      }
+
+      .hud-card {
+        pointer-events: auto;
+        background: var(--bg-glass);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid var(--border-glass);
+        border-radius: 14px;
+        padding: 10px 22px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+        text-align: center;
+      }
+
+      .hud-title {
+        font-size: 15px;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        color: var(--accent-cyan);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+      }
+
+      .hud-date {
+        font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+        font-size: 13px;
+        color: #e2e8f0;
+        margin-top: 3px;
+      }
+
+      .hud-stats {
+        font-size: 12px;
+        color: var(--text-muted);
+        margin-top: 2px;
+      }
+
+      .hud-stats strong {
+        color: var(--accent-gold);
+      }
+
+      /* Filtros de zona */
+      .filters-container {
+        pointer-events: auto;
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+
+      .filter-pill {
+        background: rgba(15, 23, 42, 0.82);
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        color: var(--text-muted);
+        padding: 5px 11px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      .filter-pill:hover {
+        border-color: var(--accent-cyan);
+        color: var(--text-main);
+      }
+
+      .filter-pill.active {
+        background: rgba(56, 189, 248, 0.22);
+        border-color: var(--accent-cyan);
+        color: var(--accent-cyan);
+      }
+
+      .filter-pill[data-zone="Peninsula-Canarias"].active {
+        background: rgba(245, 197, 66, 0.22);
+        border-color: var(--accent-gold);
+        color: var(--accent-gold);
+      }
+
+      .filter-pill[data-zone="Interinsular Canarias"].active {
+        background: rgba(0, 229, 255, 0.22);
+        border-color: #00e5ff;
+        color: #00e5ff;
+      }
+
+      .map-toggle-btn {
+        background: rgba(14, 116, 144, 0.45);
+        border: 1px solid var(--accent-cyan);
+        color: #e0f2fe;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      .map-toggle-btn:hover {
+        background: rgba(14, 116, 144, 0.75);
+      }
+
+      /* =================== LEYENDA =================== */
+      #legend-container {
+        position: absolute;
+        top: 14px;
+        left: 14px;
+        z-index: 20;
+        background: var(--bg-glass);
+        backdrop-filter: blur(10px);
+        border: 1px solid var(--border-glass);
+        border-radius: 10px;
+        padding: 10px 14px;
+        font-size: 11px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+
+      .legend-title {
+        font-weight: 700;
+        color: var(--accent-cyan);
+        margin-bottom: 2px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #cbd5e1;
+      }
+
+      .legend-color {
+        width: 14px;
+        height: 4px;
+        border-radius: 2px;
+      }
+
+      /* =================== CONTROLES INFERIORES =================== */
+      #controls-bar {
+        position: absolute;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 20;
+        width: 90%;
+        max-width: 820px;
+        background: var(--bg-glass);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid var(--border-glass);
+        border-radius: 16px;
+        padding: 10px 20px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.55);
+      }
+
+      .btn-ctrl {
+        background: #0284c7;
+        color: #ffffff;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        white-space: nowrap;
+      }
+
+      .btn-ctrl:hover {
+        background: #0369a1;
+      }
+
+      .btn-ctrl.paused {
+        background: #16a34a;
+      }
+
+      .btn-ctrl.paused:hover {
+        background: #15803d;
+      }
+
+      .speed-select {
+        background: #1e293b;
+        color: #f1f5f9;
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        padding: 6px 10px;
+        border-radius: 8px;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        outline: none;
+      }
+
+      .slider-container {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .slider-container input[type="range"] {
+        flex: 1;
+        -webkit-appearance: none;
+        appearance: none;
+        height: 6px;
+        background: rgba(255, 255, 255, 0.15);
+        border-radius: 3px;
+        outline: none;
+        cursor: pointer;
+      }
+
+      .slider-container input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: var(--accent-cyan);
+        box-shadow: 0 0 10px var(--accent-cyan);
+        cursor: pointer;
+      }
+
+      /* =================== PANEL LATERAL (DETALLES) =================== */
+      #panel-lateral {
+        position: absolute;
+        top: 14px;
+        right: -360px;
+        width: 330px;
+        max-height: calc(100vh - 28px);
+        overflow-y: auto;
+        z-index: 30;
+        background: var(--bg-glass);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+        border: 1px solid var(--border-glass);
+        border-radius: 14px;
+        padding: 18px;
+        box-shadow: -8px 0 32px rgba(0, 0, 0, 0.5);
+        transition: right 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+
+      #panel-lateral.visible {
+        right: 14px;
+      }
+
+      .panel-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        padding-bottom: 12px;
+        margin-bottom: 12px;
+      }
+
+      .panel-title {
+        font-size: 17px;
+        font-weight: 700;
+        color: #ffffff;
+      }
+
+      .panel-badge {
+        font-size: 11px;
+        font-family: monospace;
+        color: var(--accent-cyan);
+        margin-top: 2px;
+      }
+
+      .btn-close {
+        background: transparent;
+        border: none;
+        color: var(--text-muted);
+        font-size: 20px;
+        cursor: pointer;
+        padding: 0 4px;
+        line-height: 1;
+      }
+
+      .btn-close:hover {
+        color: #ffffff;
+      }
+
+      .detail-group {
+        margin-bottom: 14px;
+      }
+
+      .detail-label {
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--text-muted);
+        margin-bottom: 2px;
+      }
+
+      .detail-value {
+        font-size: 13px;
+        font-weight: 500;
+        color: #f8fafc;
+      }
+
+      .ports-route {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(15, 23, 42, 0.6);
+        border-radius: 8px;
+        padding: 10px;
+        margin: 10px 0;
+      }
+
+      .port-node {
+        flex: 1;
+      }
+
+      .route-arrow {
+        color: var(--accent-gold);
+        font-size: 16px;
+      }
+
+      .progress-container {
+        margin: 10px 0;
+      }
+
+      .progress-bar-bg {
+        width: 100%;
+        height: 6px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 3px;
+        overflow: hidden;
+      }
+
+      .progress-bar-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #0284c7, var(--accent-cyan));
+        width: 0%;
+        transition: width 0.3s;
+      }
+
+      .metrics-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        margin-top: 8px;
+      }
+
+      .metric-box {
+        background: rgba(15, 23, 42, 0.6);
+        border-radius: 8px;
+        padding: 8px 10px;
+      }
+
+      .meteo-box {
+        background: rgba(3, 105, 161, 0.15);
+        border: 1px solid rgba(56, 189, 248, 0.2);
+        border-radius: 8px;
+        padding: 10px;
+        margin-top: 10px;
+        font-size: 12px;
+      }
+
+      .hint-esc {
+        font-size: 11px;
+        color: var(--text-muted);
+        text-align: center;
+        margin-top: 12px;
+      }
+    </style>
+
+    <!-- HUD Superior -->
+    <div id="hud-container">
+      <div class="hud-card">
+        <div class="hud-title">
+          <span>🚢</span>
+          <span>IGS8 – Tráfico Marítimo en España y Canarias</span>
+        </div>
+        <div class="hud-date" id="hud-fecha">Cargando fecha simulada...</div>
+        <div class="hud-stats" id="hud-barcos-activos">Inicializando simulación...</div>
+      </div>
+
+      <!-- Filtros por zona y selector de textura de mapa -->
+      <div class="filters-container">
+        <button class="filter-pill active" data-zone="TODOS">Todos los buques</button>
+        <button class="filter-pill" data-zone="Peninsula-Canarias">Península ↔ Canarias</button>
+        <button class="filter-pill" data-zone="Interinsular Canarias">Interinsular Canarias</button>
+        <button class="filter-pill" data-zone="Estrecho-Baleares">Estrecho y Baleares</button>
+        <button class="filter-pill" data-zone="Transito Internacional / Carga">Tránsito y Carga</button>
+        <button class="map-toggle-btn" id="btn-cambiar-mapa" title="Cambiar textura geográfica del mapa">
+          🗺️ Mapa: Satélite Híbrido
+        </button>
+      </div>
+    </div>
+
+    <!-- Leyenda de colores -->
+    <div id="legend-container">
+      <div class="legend-title">Rutas Marítimas</div>
+      <div class="legend-item">
+        <div class="legend-color" style="background: #f5c542;"></div>
+        <span>Península ↔ Canarias</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color" style="background: #00e5ff;"></div>
+        <span>Interinsular Canarias</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color" style="background: #3b82f6;"></div>
+        <span>Estrecho y Baleares</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color" style="background: #c084fc;"></div>
+        <span>Carga e Internacional</span>
+      </div>
+    </div>
+
+    <!-- Panel lateral "Barco seleccionado" -->
+    <div id="panel-lateral">
+      <div class="panel-header">
+        <div>
+          <div class="panel-title" id="det-nombre">Nombre Buque</div>
+          <div class="panel-badge" id="det-mmsi">MMSI: 000000000</div>
+        </div>
+        <button class="btn-close" id="btn-cerrar-panel" title="Cerrar (Esc)">&times;</button>
+      </div>
+
+      <div class="detail-group">
+        <div class="detail-label">Compañía y Tipo</div>
+        <div class="detail-value" id="det-compania">-</div>
+        <div class="detail-value" style="color: var(--accent-cyan); font-size: 12px;" id="det-tipo">-</div>
+      </div>
+
+      <div class="detail-group">
+        <div class="detail-label">Zona de Operación</div>
+        <div class="detail-value" id="det-zona">-</div>
+      </div>
+
+      <!-- Ruta y Puertos -->
+      <div class="ports-route">
+        <div class="port-node">
+          <div class="detail-label">Origen</div>
+          <div class="detail-value" id="det-origen" style="font-size: 12px;">-</div>
+          <div style="font-size: 11px; color: var(--text-muted);" id="det-salida">-</div>
+        </div>
+        <div class="route-arrow">➔</div>
+        <div class="port-node" style="text-align: right;">
+          <div class="detail-label">Destino</div>
+          <div class="detail-value" id="det-destino" style="font-size: 12px;">-</div>
+          <div style="font-size: 11px; color: var(--text-muted);" id="det-llegada">-</div>
+        </div>
+      </div>
+
+      <!-- Progreso del trayecto -->
+      <div class="progress-container">
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" id="det-barra-progreso"></div>
+        </div>
+        <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;" id="det-progreso-txt">
+          0% completado
+        </div>
+      </div>
+
+      <!-- Métricas del buque -->
+      <div class="metrics-grid">
+        <div class="metric-box">
+          <div class="detail-label">Velocidad</div>
+          <div class="detail-value" id="det-velocidad">0 kts</div>
+        </div>
+        <div class="metric-box">
+          <div class="detail-label">Eslora × Calado</div>
+          <div class="detail-value" id="det-dimensiones">0 m × 0 m</div>
+        </div>
+      </div>
+
+      <!-- Condiciones Meteorológicas en la Ruta -->
+      <div class="meteo-box">
+        <div class="detail-label" style="color: var(--accent-cyan); margin-bottom: 4px;">Condiciones del Mar</div>
+        <div>💨 <strong id="det-viento">-</strong></div>
+        <div style="margin-top: 3px;">🌊 <span id="det-mar">-</span></div>
+        <div style="margin-top: 3px; color: var(--text-muted);">👁️ <span id="det-visib">-</span></div>
+      </div>
+
+      <div class="hint-esc">Pulsa <strong>Esc</strong> para volver a control libre</div>
+    </div>
+
+    <!-- Barra de Controles de la Simulación -->
+    <div id="controls-bar">
+      <button class="btn-ctrl" id="btn-play-pause">
+        ⏸ Pausar
+      </button>
+
+      <select class="speed-select" id="sel-velocidad" title="Factor de velocidad">
+        <option value="1">Velocidad x1</option>
+        <option value="5">Velocidad x5</option>
+        <option value="15">Velocidad x15</option>
+        <option value="30">Velocidad x30</option>
+        <option value="60" selected>Velocidad x60</option>
+        <option value="120">Velocidad x120</option>
+        <option value="300">Velocidad x300</option>
+        <option value="600">Velocidad x600</option>
+      </select>
+
+      <div class="slider-container">
+        <span style="font-size: 12px; color: var(--text-muted);">Línea Temporal</span>
+        <input type="range" id="slider-tiempo" min="0" max="100" step="0.1" value="0" />
+      </div>
+    </div>
+
+    <!-- Práctica S8 IG: Visualización de Tráfico Marítimo en Three.js -->
+    <script src="script_barcos.js" type="module"></script>
+  </body>
+</html>
